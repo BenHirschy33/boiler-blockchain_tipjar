@@ -74,6 +74,20 @@ contract TipJarTest is Test {
         tipJar.deposit{value: 0}();
     }
 
+    /// @notice Fuzz test that deposits of any random amount accumulate correctly
+    function testFuzz_Deposit(uint96 amount) public {
+        vm.assume(amount > 0 && amount <= 100 ether);
+
+        // Give user1 one amount ETH
+        vm.deal(user1, amount);
+        vm.prank(user1);
+        tipJar.deposit{value: amount}();
+
+        assertEq(tipJar.totalTipped(user1), amount);
+        assertEq(tipJar.totalReceived(), amount);
+        assertEq(address(tipJar).balance, amount);
+    }
+
     // Test Withdraw Functionality
 
     function test_OwnerWithdraw() public {
@@ -95,7 +109,12 @@ contract TipJarTest is Test {
         tipJar.deposit{value: 1 ether}();
 
         // Expect a revert from OwnableUnauthorizedAccount with the user2 address
-        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, user2));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                user2
+            )
+        );
         vm.prank(user2);
         tipJar.withdraw();
     }
@@ -106,7 +125,7 @@ contract TipJarTest is Test {
         tipJar.withdraw();
     }
 
-    // Test events
+    // Test tipped event
 
     // Declare the event signature to match TipJar.sol
     event Tipped(address indexed from, uint256 amount, uint256 newTotal);
