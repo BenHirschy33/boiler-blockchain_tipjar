@@ -37,6 +37,7 @@ contract TipJar is Ownable {
     /// @notice Allows the owner to withdraw the entire balance of the contract
     function withdraw() public onlyOwner {
         // onlyOwner checks if msg.sender is the owner. If not it rejects the transaction.
+        // Reverts with 'OwnableUnauthorizedAccount(msg.sender)' if msg.sender is not the owner.
 
         // Get balance for this address (tipjar)
         uint256 balance = address(this).balance;
@@ -45,7 +46,8 @@ contract TipJar is Ownable {
         require(balance > 0, "TipJar: No balance to withdraw");
 
         // Send the balance to the owner
-        (bool success,) = payable(owner()).call{value: balance}("");
+        // Using .call{value:} instead of .transfer() because .transfer is nto used anymore od to gas limit
+        (bool success, ) = payable(owner()).call{value: balance}("");
         require(success, "TipJar: Withdrawal failed");
     }
 }
