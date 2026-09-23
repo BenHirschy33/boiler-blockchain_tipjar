@@ -109,12 +109,7 @@ contract TipJarTest is Test {
         tipJar.deposit{value: 1 ether}();
 
         // Expect a revert from OwnableUnauthorizedAccount with the user2 address
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                Ownable.OwnableUnauthorizedAccount.selector,
-                user2
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, user2));
         vm.prank(user2);
         tipJar.withdraw();
     }
