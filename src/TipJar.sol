@@ -47,7 +47,7 @@ contract TipJar is Ownable {
 
         // Send the balance to the owner
         // Using .call{value:} instead of .transfer() because .transfer is nto used anymore od to gas limit
-        (bool success, ) = payable(owner()).call{value: balance}("");
+        (bool success,) = payable(owner()).call{value: balance}("");
         require(success, "TipJar: Withdrawal failed");
     }
 }
