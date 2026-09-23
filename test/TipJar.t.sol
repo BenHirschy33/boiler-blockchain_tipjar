@@ -95,7 +95,12 @@ contract TipJarTest is Test {
         tipJar.deposit{value: 1 ether}();
 
         // Expect a revert from OwnableUnauthorizedAccount with the user2 address
-        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, user2));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                user2
+            )
+        );
         vm.prank(user2);
         tipJar.withdraw();
     }
@@ -122,5 +127,27 @@ contract TipJarTest is Test {
         // Perform the deposit that triggers the event:
         vm.prank(user1);
         tipJar.deposit{value: 1 ether}();
+    }
+
+    // Test submission (2 deposits, then withdraw)
+    function test_Submission() public {
+        vm.prank(user1);
+        tipJar.deposit{value: 1 ether}();
+
+        vm.prank(user1);
+        tipJar.deposit{value: 2 ether}();
+
+        assertEq(tipJar.totalTipped(user1), 3 ether);
+        assertEq(tipJar.totalReceived(), 3 ether);
+        assertEq(address(tipJar).balance, 3 ether);
+
+        uint256 ownerInitialBalance = owner.balance;
+
+        vm.prank(owner);
+        tipJar.withdraw();
+
+        assertEq(tipJar.totalReceived(), 3 ether);
+        assertEq(address(tipJar).balance, 0);
+        assertEq(owner.balance, ownerInitialBalance + 3 ether);
     }
 }
